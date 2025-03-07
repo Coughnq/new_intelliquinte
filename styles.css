@@ -1,0 +1,72 @@
+/* Base styles and variables */
+:root {
+    --color-cream: #f8f5f1;
+    --color-darker-cream: #f0e8dc;
+    --color-text: #000000;
+    --font-serif: 'Libre Baskerville', serif;
+    --font-sans: 'Montserrat', sans-serif;
+}
+
+/* Reset and global styles */
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+html, body {
+    height: 100%;
+    width: 100%;
+}
+
+body {
+    font-family: var(--font-sans);
+    color: var(--color-text);
+    background-color: var(--color-cream);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+}
+
+.container {
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+    padding: 1rem;
+    position: relative;
+}
+
+main {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.content {
+    text-align: center;
+}
+
+h1 {
+    font-family: var(--font-serif);
+    font-size: clamp(2.5rem, 12vw, 6rem);
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.02em;
+    color: #000000;
+}
+
+footer {
+    width: 100%;
+    padding: 1rem 0;
+    text-align: center;
+    margin-top: auto;
+}
+
+.copyright {
+    font-family: var(--font-sans);
+    font-size: 1rem;
+    font-weight: 400;
+    color: #000000;
+    letter-spacing: 0.02em;
+} 
