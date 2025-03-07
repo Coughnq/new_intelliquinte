@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Unexpected Error | Intelliquinte</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --color-cream: #f8f5f1;
+            --color-darker-cream: #f0e8dc;
+            --color-lightest: #fffcf8;
+            --color-text: #000000;
+            --color-secondary: #666666;
+            --color-accent: #ad9d8b;
+            --font-serif: 'Libre Baskerville', serif;
+            --font-sans: 'Montserrat', sans-serif;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html, body {
+            height: 100%;
+            width: 100%;
+        }
+
+        body {
+            font-family: var(--font-sans);
+            color: var(--color-text);
+            background-color: var(--color-cream);
+            line-height: 1.6;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            text-align: center;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        .error-container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .logo {
+            margin-bottom: 3rem;
+            max-width: 150px;
+        }
+
+        .error-title {
+            font-family: var(--font-serif);
+            font-size: clamp(1.5rem, 4vw, 2.5rem);
+            font-weight: 400;
+            margin-bottom: 1.5rem;
+        }
+
+        .error-message {
+            font-family: var(--font-sans);
+            font-weight: 300;
+            font-size: 1.1rem;
+            color: var(--color-secondary);
+            margin-bottom: 2.5rem;
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        @media (min-width: 600px) {
+            .nav-links {
+                flex-direction: row;
+                justify-content: center;
+            }
+        }
+
+        .nav-link {
+            display: inline-block;
+            text-decoration: none;
+            color: var(--color-text);
+            font-weight: 400;
+            letter-spacing: 0.02em;
+            padding: 0.75rem 1.5rem;
+            border: 1px solid var(--color-text);
+            transition: all 0.3s ease;
+            font-size: 0.9rem;
+        }
+
+        .nav-link:hover {
+            background-color: var(--color-text);
+            color: var(--color-cream);
+        }
+
+        .subtle-link {
+            color: var(--color-secondary);
+            text-decoration: none;
+            font-size: 0.9rem;
+            margin-top: 2rem;
+            display: inline-block;
+            position: relative;
+            transition: color 0.3s ease;
+        }
+
+        .subtle-link::after {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 1px;
+            bottom: -2px;
+            left: 0;
+            background-color: var(--color-secondary);
+            transform: scaleX(0);
+            transform-origin: bottom right;
+            transition: transform 0.3s ease;
+        }
+
+        .subtle-link:hover {
+            color: var(--color-text);
+        }
+
+        .subtle-link:hover::after {
+            transform: scaleX(1);
+            transform-origin: bottom left;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <img src="brand-guidelines/intelliquinte.PNG" alt="Intelliquinte Logo" class="logo">
+        
+        <h1 class="error-title">Something Went Wrong</h1>
+        
+        <p class="error-message">
+            We encountered an unexpected error while processing your request.
+            Our team has been notified and is working to resolve the issue.
+        </p>
+        
+        <div class="nav-links">
+            <a href="index.html" class="nav-link">Return to Homepage</a>
+            <a href="javascript:history.back()" class="nav-link">Go Back</a>
+        </div>
+        
+        <a href="mailto:support@intelliquinte.com" class="subtle-link">Report this Issue</a>
+    </div>
+</body>
+</html> 

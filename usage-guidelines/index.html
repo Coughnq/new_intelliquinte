@@ -1,0 +1,745 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Intelliquinte Usage Guide</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Libre+Baskerville:wght@400;700&family=Montserrat:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <meta name="description" content="A comprehensive guide for implementing the Intelliquinte brand system across all touchpoints.">
+</head>
+<body>
+    <button class="mobile-nav-toggle" id="sidebarToggle" aria-label="Toggle navigation">☰</button>
+
+    <header>
+        <div class="container">
+            <div class="logo-container">
+                <img src="intelliquinte.PNG" alt="Intelliquinte Logo" class="header-logo">
+            </div>
+            <h1 class="document-title">Intelliquinte Usage Guide</h1>
+            <p class="subtitle">A comprehensive resource for implementing and leveraging the Intelliquinte brand system across all touchpoints.</p>
+            <a href="../brand-guidelines/index.html" class="back-to-guidelines">Return to Brand Guidelines</a>
+        </div>
+    </header>
+
+    <nav class="document-nav">
+        <div class="container">
+            <div class="nav-container">
+                <a href="#getting-started">Getting Started</a>
+                <a href="#design-system">Design System</a>
+                <a href="#content-creation">Content Creation</a>
+                <a href="#implementation">Implementation</a>
+                <a href="#templates">Templates</a>
+                <a href="#faq">FAQ</a>
+            </div>
+        </div>
+    </nav>
+
+    <main>
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-nav">
+                <h3 class="sidebar-title">Usage Guide</h3>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Getting Started</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#overview" class="current">Overview</a></li>
+                        <li class="nav-item"><a href="#brand-philosophy">Brand Philosophy</a></li>
+                        <li class="nav-item"><a href="#how-to-use-this-guide">How to Use This Guide</a></li>
+                        <li class="nav-item">
+                            <a href="#key-principles">Key Principles</a>
+                            <ul class="sub-nav-items">
+                                <li class="sub-nav-item"><a href="#intentionality">Intentionality</a></li>
+                                <li class="sub-nav-item"><a href="#minimalism">Minimalism</a></li>
+                                <li class="sub-nav-item"><a href="#refinement">Refinement</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </div>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Design System</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#color-usage">Color Usage</a></li>
+                        <li class="nav-item"><a href="#typography-implementation">Typography Implementation</a></li>
+                        <li class="nav-item"><a href="#spacing-system">Spacing System</a></li>
+                        <li class="nav-item"><a href="#layouts">Layouts & Composition</a></li>
+                        <li class="nav-item"><a href="#imagery">Imagery & Photography</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Content Creation</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#writing-style">Writing Style Guide</a></li>
+                        <li class="nav-item"><a href="#messaging">Messaging Framework</a></li>
+                        <li class="nav-item"><a href="#content-types">Content Types</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Implementation</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#digital-applications">Digital Applications</a></li>
+                        <li class="nav-item"><a href="#print-applications">Print Applications</a></li>
+                        <li class="nav-item"><a href="#environmental">Environmental Design</a></li>
+                        <li class="nav-item"><a href="#social-media">Social Media</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Templates & Resources</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#templates-overview">Templates Overview</a></li>
+                        <li class="nav-item"><a href="#brand-assets">Brand Assets</a></li>
+                        <li class="nav-item"><a href="#css-framework">CSS Framework</a></li>
+                    </ul>
+                </div>
+                
+                <div class="nav-group">
+                    <h4 class="nav-group-title">Support</h4>
+                    <ul class="nav-items">
+                        <li class="nav-item"><a href="#faq">Frequently Asked Questions</a></li>
+                        <li class="nav-item"><a href="#contact">Contact IQ Team</a></li>
+                    </ul>
+                </div>
+            </div>
+        </aside>
+
+        <div class="content-area">
+            <section id="overview" class="page-section">
+                <h1 class="page-title">Overview</h1>
+                <div class="text-content">
+                    <p>Welcome to the Intelliquinte Usage Guide, a comprehensive resource designed to help you effectively implement the Intelliquinte brand across all touchpoints. This guide provides in-depth instruction and practical examples for applying our brand system with consistency and purpose.</p>
+                    
+                    <p>Unlike the Brand Guidelines, which focus on defining our visual identity and brand principles, this Usage Guide delves into the practical application of those principles. Here you'll find detailed instructions, examples, and templates for putting the Intelliquinte brand to work.</p>
+                    
+                    <div class="example-box">
+                        <p style="font-family: var(--font-serif); font-size: 1.4rem; margin-bottom: 1.5rem;">"The value of a brand lies not just in its definition, but in its consistent and thoughtful application."</p>
+                        <p>Every application of the Intelliquinte brand should be approached with intention. This means understanding not just what our brand elements are, but why they exist and how they work together to express our unique perspective.</p>
+                    </div>
+                    
+                    <h2 class="section-title">How This Guide Is Organized</h2>
+                    
+                    <p>This guide is structured to provide both breadth and depth of information. The main sections offer a comprehensive overview of key areas, while nested pages provide detailed instruction for specific applications.</p>
+
+                    <div class="tab-system">
+                        <div class="tab-nav">
+                            <div class="tab-nav-item active" data-tab="organization-structure">Structure</div>
+                            <div class="tab-nav-item" data-tab="organization-navigation">Navigation</div>
+                            <div class="tab-nav-item" data-tab="organization-updates">Updates</div>
+                        </div>
+                        <div class="tab-content active" id="organization-structure">
+                            <h3 class="subsection-title">Document Structure</h3>
+                            <p>The Usage Guide is organized into six main sections:</p>
+                            <ul>
+                                <li><strong>Getting Started</strong> — Introduction to the brand system and how to use this guide</li>
+                                <li><strong>Design System</strong> — Detailed instruction on implementing visual elements</li>
+                                <li><strong>Content Creation</strong> — Guidelines for writing and messaging</li>
+                                <li><strong>Implementation</strong> — Application across different media and contexts</li>
+                                <li><strong>Templates</strong> — Ready-to-use resources and assets</li>
+                                <li><strong>FAQ</strong> — Answers to common questions</li>
+                            </ul>
+                            <p>Within each section, you'll find detailed pages covering specific topics, examples of proper application, and do's and don'ts to guide implementation.</p>
+                        </div>
+                        <div class="tab-content" id="organization-navigation">
+                            <h3 class="subsection-title">Navigating the Guide</h3>
+                            <p>There are multiple ways to navigate this guide:</p>
+                            <ul>
+                                <li><strong>Top Navigation</strong> — Use the top navigation bar to jump to major sections</li>
+                                <li><strong>Sidebar</strong> — The sidebar provides detailed navigation to all pages and sub-sections</li>
+                                <li><strong>In-page Links</strong> — Throughout the guide, you'll find helpful cross-references to related content</li>
+                                <li><strong>Search</strong> — Use the search function to quickly find specific information</li>
+                            </ul>
+                            <p>We recommend first-time users start with the Getting Started section for a solid foundation before exploring more specific application guidance.</p>
+                        </div>
+                        <div class="tab-content" id="organization-updates">
+                            <h3 class="subsection-title">Updates and Versioning</h3>
+                            <p>The Intelliquinte brand system is designed to evolve over time while maintaining its core principles. This guide will be updated accordingly:</p>
+                            <ul>
+                                <li><strong>Major Updates</strong> — Significant changes to the brand system will be communicated directly to all stakeholders</li>
+                                <li><strong>Ongoing Refinements</strong> — Minor improvements and clarifications will be made continuously</li>
+                                <li><strong>Version History</strong> — A complete record of changes is maintained in the Appendix</li>
+                            </ul>
+                            <p>The current version of this guide is <strong>1.0</strong>, published March 2025.</p>
+                        </div>
+                    </div>
+                    
+                    <h2 class="section-title">Core Objectives</h2>
+                    
+                    <p>This Usage Guide aims to:</p>
+                    
+                    <ul>
+                        <li>Provide clear, actionable guidance for applying the Intelliquinte brand</li>
+                        <li>Ensure consistency across all brand touchpoints while allowing for contextual adaptation</li>
+                        <li>Empower creators with the understanding needed to make informed decisions</li>
+                        <li>Establish a common language and reference point for all brand-related discussions</li>
+                    </ul>
+                    
+                    <p>By following this guide, you'll help strengthen the Intelliquinte brand through thoughtful, consistent application that remains true to our foundational principles.</p>
+                </div>
+            </section>
+
+            <section id="brand-philosophy" class="page-section">
+                <h2 class="section-title">Brand Philosophy</h2>
+                <div class="text-content">
+                    <p>The Intelliquinte brand is built on a philosophical foundation that informs everything we do. Understanding this philosophy is essential for successful brand implementation.</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Intentional Presence</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>Intelliquinte exists to create moments of intentional presence amidst the chaos of modern life. Our brand rejects the culture of noise and distraction, instead offering spaces of clarity and meaning.</p>
+                                <p>In practice, this means that every brand expression should feel deliberate and purposeful. Nothing is arbitrary; everything serves the greater vision of creating experiences that invite introspection and clarity.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">The Power of Subtraction</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>We believe in the power of subtraction — that true refinement comes not from adding more, but from carefully removing the unnecessary to reveal what matters most.</p>
+                                <p>This principle should guide all design and communication decisions. Before adding an element, ask whether it truly serves the core message. The most powerful expressions of our brand will often be the most restrained.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Thoughtful Depth</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>Intelliquinte balances minimalism with depth. While our aesthetic is clean and restrained, it should never feel empty or lacking in substance.</p>
+                                <p>This tension — between simplicity and richness — is central to our brand. We achieve it through thoughtful details, nuanced typography, and content that invites deeper engagement rather than instant consumption.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Timeless over Trendy</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>The Intelliquinte brand aspires to timelessness rather than trendiness. Our design system draws inspiration from classical principles of proportion, typography, and composition while maintaining a contemporary relevance.</p>
+                                <p>When implementing the brand, resist the urge to follow fleeting design trends. Instead, focus on creating expressions that will feel as relevant and purposeful years from now as they do today.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="how-to-use-this-guide" class="page-section">
+                <h2 class="section-title">How to Use This Guide</h2>
+                <div class="text-content">
+                    <p>This Usage Guide is designed to serve different users with varying needs. Here's how to get the most out of it based on your role and requirements:</p>
+                    
+                    <h3 class="subsection-title">For Different Users</h3>
+                    
+                    <div class="tool-grid">
+                        <div class="tool-card">
+                            <div class="tool-icon">👩‍💻</div>
+                            <h4 class="tool-title">Designers</h4>
+                            <p>Start with the Design System section for detailed specifications on visual elements. Reference the Templates section for ready-to-use assets.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">✍️</div>
+                            <h4 class="tool-title">Content Creators</h4>
+                            <p>Focus on the Content Creation section for guidance on tone, voice, and messaging frameworks that align with the Intelliquinte brand.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">🧠</div>
+                            <h4 class="tool-title">Strategists</h4>
+                            <p>Begin with Brand Philosophy to understand the foundational thinking, then explore how those principles manifest across different touchpoints.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">🚀</div>
+                            <h4 class="tool-title">Implementation Teams</h4>
+                            <p>The Implementation section provides practical guidance for applying the brand in specific contexts and media.</p>
+                        </div>
+                    </div>
+                    
+                    <h3 class="subsection-title">For Different Scenarios</h3>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Scenario</th>
+                                    <th>Recommended Approach</th>
+                                    <th>Key Sections</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Creating new brand materials</td>
+                                    <td>Start with understanding the brand philosophy, then reference specific implementation guidelines</td>
+                                    <td>Brand Philosophy, Design System, Templates</td>
+                                </tr>
+                                <tr>
+                                    <td>Updating existing materials</td>
+                                    <td>Focus on specific elements that need alignment with current standards</td>
+                                    <td>Implementation, Design System</td>
+                                </tr>
+                                <tr>
+                                    <td>Training new team members</td>
+                                    <td>Provide a structured introduction to the entire guide, emphasizing core principles</td>
+                                    <td>Overview, Brand Philosophy, Key Principles</td>
+                                </tr>
+                                <tr>
+                                    <td>Answering specific questions</td>
+                                    <td>Use the search function or FAQ section to find targeted information</td>
+                                    <td>FAQ, specific implementation sections</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <h3 class="subsection-title">Decision-Making Framework</h3>
+                    
+                    <p>When faced with brand decisions not explicitly covered in this guide, use this framework:</p>
+                    
+                    <ol>
+                        <li><strong>Alignment Check</strong>: Does the decision align with Intelliquinte's core brand philosophy?</li>
+                        <li><strong>Principle Application</strong>: How can our key principles (intentionality, minimalism, refinement) guide this specific case?</li>
+                        <li><strong>Contextual Adaptation</strong>: How should the solution be adapted for this specific context while maintaining brand consistency?</li>
+                        <li><strong>Future Consideration</strong>: Will this decision establish a precedent that works for similar situations in the future?</li>
+                    </ol>
+                    
+                    <p>If you're still uncertain after applying this framework, consult with the IQ Team using the contact information in the Support section.</p>
+                </div>
+            </section>
+
+            <!-- Adding sections for key principles -->
+            <section id="key-principles" class="page-section">
+                <h2 class="section-title">Key Principles</h2>
+                <div class="text-content">
+                    <p>The Intelliquinte brand is guided by several key principles that inform all aspects of our brand expression. These principles are the foundation of our approach to design, communication, and user experience.</p>
+                    
+                    <section id="intentionality" class="sub-section">
+                        <h3 class="subsection-title">Intentionality</h3>
+                        <p>Every element of the Intelliquinte brand exists for a purpose. Nothing is arbitrary or decorative without function. This principle guides both our design decisions and our communication strategy.</p>
+                        
+                        <div class="example-box">
+                            <h4>Application Examples:</h4>
+                            <ul>
+                                <li>Use white space deliberately to create focus and hierarchy</li>
+                                <li>Choose each word in copy with purpose and precision</li>
+                                <li>Design interactions that guide users with clarity</li>
+                            </ul>
+                        </div>
+                    </section>
+                    
+                    <section id="minimalism" class="sub-section">
+                        <h3 class="subsection-title">Minimalism</h3>
+                        <p>We believe in the power of reduction—removing the unnecessary to reveal what truly matters. This doesn't mean stark or empty designs, but rather thoughtfully restrained expressions that communicate with clarity.</p>
+                        
+                        <div class="example-box">
+                            <h4>Application Examples:</h4>
+                            <ul>
+                                <li>Prioritize essential content and remove distractions</li>
+                                <li>Use visual elements sparingly but purposefully</li>
+                                <li>Create breathing room that allows content to resonate</li>
+                            </ul>
+                        </div>
+                    </section>
+                    
+                    <section id="refinement" class="sub-section">
+                        <h3 class="subsection-title">Refinement</h3>
+                        <p>Intelliquinte is characterized by attention to detail and a sense of quality that comes from careful refinement. This principle ensures our brand appears polished and considered in all contexts.</p>
+                        
+                        <div class="example-box">
+                            <h4>Application Examples:</h4>
+                            <ul>
+                                <li>Pay careful attention to typography details like kerning and alignment</li>
+                                <li>Ensure consistent execution across all touchpoints</li>
+                                <li>Continuously improve based on insights and feedback</li>
+                            </ul>
+                        </div>
+                    </section>
+                </div>
+            </section>
+
+            <!-- Adding section stubs for remaining sections in the navigation -->
+            <section id="color-usage" class="page-section">
+                <h2 class="section-title">Color Usage</h2>
+                <div class="text-content">
+                    <p>Proper application of the Intelliquinte color palette ensures visual consistency and reinforces our brand identity. This section provides detailed guidance on how to use our colors effectively across different media and contexts.</p>
+                    <p><em>Detailed content will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="typography-implementation" class="page-section">
+                <h2 class="section-title">Typography Implementation</h2>
+                <div class="text-content">
+                    <p>Typography is a cornerstone of the Intelliquinte visual identity. This section covers specific guidelines for implementing our typefaces across digital and print applications.</p>
+                    <p><em>Detailed content will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="spacing-system" class="page-section">
+                <h2 class="section-title">Spacing System</h2>
+                <div class="text-content">
+                    <p>Consistent spacing is essential for creating harmonious layouts and maintaining the Intelliquinte aesthetic. Our spacing system is built on a modular scale that ensures proportional relationships between elements.</p>
+                    
+                    <div class="example-box">
+                        <h4>Core Spacing Units</h4>
+                        <p>Our spacing system uses a base unit of 8px, with the following standard increments:</p>
+                        <ul>
+                            <li><strong>4px (0.5×)</strong> - Micro spacing for tight relationships</li>
+                            <li><strong>8px (1×)</strong> - Base unit for general spacing</li>
+                            <li><strong>16px (2×)</strong> - Standard spacing between related elements</li>
+                            <li><strong>24px (3×)</strong> - Medium spacing between distinct elements</li>
+                            <li><strong>32px (4×)</strong> - Large spacing for major separations</li>
+                            <li><strong>48px (6×)</strong> - Section spacing</li>
+                            <li><strong>64px (8×)</strong> - Major section spacing</li>
+                        </ul>
+                    </div>
+                    
+                    <p>Using consistent spacing increments creates visual rhythm and harmony throughout the user experience. For detailed implementation instructions, including code snippets and component-specific guidance, refer to our CSS Framework section.</p>
+                </div>
+            </section>
+
+            <section id="layouts" class="page-section">
+                <h2 class="section-title">Layouts & Composition</h2>
+                <div class="text-content">
+                    <p>Intelliquinte layouts embody our principles of intentionality and refinement through thoughtful composition and deliberate use of space. This section provides guidelines for creating layouts that align with our brand aesthetic.</p>
+                    <p><em>Detailed layout guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="imagery" class="page-section">
+                <h2 class="section-title">Imagery & Photography</h2>
+                <div class="text-content">
+                    <p>Visual imagery plays a crucial role in expressing the Intelliquinte brand. Our imagery style reinforces our values through a consistent visual language that evokes clarity, quality, and timeless elegance.</p>
+                    <p><em>Comprehensive imagery guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="writing-style" class="page-section">
+                <h2 class="section-title">Writing Style Guide</h2>
+                <div class="text-content">
+                    <p>The Intelliquinte voice is characterized by clarity, thoughtfulness, and quiet confidence. This section provides detailed guidance on tone, style, and language usage to ensure consistent communication across all channels.</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Voice Characteristics</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>The Intelliquinte voice is:</p>
+                                <ul>
+                                    <li><strong>Clear</strong> - We prioritize clarity over cleverness, using straightforward language that communicates with precision</li>
+                                    <li><strong>Thoughtful</strong> - Our communication demonstrates careful consideration and depth of thinking</li>
+                                    <li><strong>Refined</strong> - We use language that reflects quality and sophistication without being pretentious</li>
+                                    <li><strong>Warm</strong> - While maintaining professionalism, our tone is approachable and human</li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Grammar & Mechanics</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>For consistency in written communication, follow these guidelines:</p>
+                                <ul>
+                                    <li>Use the Oxford comma in series of three or more items</li>
+                                    <li>Write in active voice whenever possible</li>
+                                    <li>Use sentence case for headlines and subheadlines</li>
+                                    <li>Avoid exclamation points except in informal contexts</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p><em>Additional writing guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="messaging" class="page-section">
+                <h2 class="section-title">Messaging Framework</h2>
+                <div class="text-content">
+                    <p>Our messaging framework ensures consistency in how we communicate about Intelliquinte across different contexts and audiences. This structured approach helps maintain clarity and cohesion in all brand communications.</p>
+                    <p><em>Complete messaging framework will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="content-types" class="page-section">
+                <h2 class="section-title">Content Types</h2>
+                <div class="text-content">
+                    <p>Different content types require specific approaches while maintaining the overall Intelliquinte voice. This section provides guidelines for creating various types of content, from website copy to social media posts.</p>
+                    <p><em>Detailed content type guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="digital-applications" class="page-section">
+                <h2 class="section-title">Digital Applications</h2>
+                <div class="text-content">
+                    <p>Applying the Intelliquinte brand to digital touchpoints requires special consideration for interaction, responsiveness, and accessibility. This section provides guidance for maintaining brand consistency across digital platforms.</p>
+                    
+                    <div class="tool-grid">
+                        <div class="tool-card">
+                            <div class="tool-icon">🖥️</div>
+                            <h4 class="tool-title">Website</h4>
+                            <p>Guidelines for implementing the Intelliquinte brand on our primary web presence, focusing on user experience and content presentation.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">📱</div>
+                            <h4 class="tool-title">Mobile Applications</h4>
+                            <p>Adapting our brand system for mobile interfaces while maintaining usability and brand recognition.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">📧</div>
+                            <h4 class="tool-title">Email</h4>
+                            <p>Templates and guidelines for email communications, including newsletters and transactional messages.</p>
+                        </div>
+                        
+                        <div class="tool-card">
+                            <div class="tool-icon">🔍</div>
+                            <h4 class="tool-title">Digital Advertising</h4>
+                            <p>Standards for paid media that maintain brand integrity while driving performance.</p>
+                        </div>
+                    </div>
+                    
+                    <p><em>Comprehensive digital application guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="print-applications" class="page-section">
+                <h2 class="section-title">Print Applications</h2>
+                <div class="text-content">
+                    <p>Print materials offer unique opportunities to express the tactile and physical qualities of the Intelliquinte brand. This section covers guidelines for various print applications.</p>
+                    <p><em>Detailed print guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="environmental" class="page-section">
+                <h2 class="section-title">Environmental Design</h2>
+                <div class="text-content">
+                    <p>Translating the Intelliquinte brand into physical spaces requires careful consideration of scale, materials, and spatial experience. This section provides guidance for environmental applications.</p>
+                    <p><em>Environmental design guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="social-media" class="page-section">
+                <h2 class="section-title">Social Media</h2>
+                <div class="text-content">
+                    <p>Social media presents unique challenges and opportunities for expressing the Intelliquinte brand. This section provides platform-specific guidance while maintaining overall brand consistency.</p>
+                    <p><em>Social media guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="templates-overview" class="page-section">
+                <h2 class="section-title">Templates Overview</h2>
+                <div class="text-content">
+                    <p>Intelliquinte provides a comprehensive set of templates to ensure consistency and efficiency in brand implementation. This section provides an overview of available templates and how to access them.</p>
+                    
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Template Type</th>
+                                    <th>Description</th>
+                                    <th>Format</th>
+                                    <th>Access</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>Presentation</td>
+                                    <td>Standard presentation templates with various layouts and components</td>
+                                    <td>PowerPoint, Keynote</td>
+                                    <td>Brand Portal</td>
+                                </tr>
+                                <tr>
+                                    <td>Document</td>
+                                    <td>Word processing templates for various document types</td>
+                                    <td>Word, Pages, PDF</td>
+                                    <td>Brand Portal</td>
+                                </tr>
+                                <tr>
+                                    <td>Email</td>
+                                    <td>HTML email templates for newsletters and communications</td>
+                                    <td>HTML, Campaign Monitor</td>
+                                    <td>Marketing Team</td>
+                                </tr>
+                                <tr>
+                                    <td>Social Media</td>
+                                    <td>Templates for various social platforms and post types</td>
+                                    <td>PSD, AI, Figma</td>
+                                    <td>Brand Portal</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <p><em>Additional template resources will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="brand-assets" class="page-section">
+                <h2 class="section-title">Brand Assets</h2>
+                <div class="text-content">
+                    <p>This section provides information on how to access and use official Intelliquinte brand assets, including logos, fonts, imagery, and other design elements.</p>
+                    <p><em>Comprehensive asset guidelines will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="css-framework" class="page-section">
+                <h2 class="section-title">CSS Framework</h2>
+                <div class="text-content">
+                    <p>The Intelliquinte CSS framework provides a systematic approach to implementing our brand in digital interfaces. This section provides technical documentation for developers.</p>
+                    
+                    <div class="code-example">
+                        <h4>Color Variables</h4>
+<pre><code>:root {
+    --color-cream: #f8f5f1;
+    --color-darker-cream: #f0e8dc;
+    --color-lightest: #fffcf8;
+    --color-text: #000000;
+    --color-secondary: #666666;
+    --color-accent: #ad9d8b;
+}</code></pre>
+                    </div>
+                    
+                    <p><em>Complete CSS framework documentation will be added in the next update.</em></p>
+                </div>
+            </section>
+
+            <section id="faq" class="page-section">
+                <h2 class="section-title">Frequently Asked Questions</h2>
+                <div class="text-content">
+                    <p>This section addresses common questions about implementing the Intelliquinte brand across various contexts and touchpoints.</p>
+                    
+                    <div class="accordion">
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">How do I request custom brand assets?</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>For custom brand assets or special applications not covered by standard templates, please submit a request through the Brand Portal or contact the IQ Team directly at support@intelliquinte.com with the following information:</p>
+                                <ul>
+                                    <li>Project name and description</li>
+                                    <li>Specific assets needed</li>
+                                    <li>Timeline and deadline</li>
+                                    <li>Intended use and context</li>
+                                </ul>
+                                <p>The IQ Team will respond within 2 business days with next steps.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">Can I modify brand assets for specific applications?</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>Core brand assets such as the logo, typography, and color palette should not be modified without approval from the IQ Team. However, we understand that certain applications may require adaptations.</p>
+                                <p>If you believe your application requires modifications to standard brand assets, please contact the IQ Team with a detailed explanation of the specific context and constraints before proceeding.</p>
+                            </div>
+                        </div>
+                        
+                        <div class="accordion-item">
+                            <div class="accordion-header">
+                                <span class="accordion-title">How often is this guide updated?</span>
+                                <span class="accordion-icon">▼</span>
+                            </div>
+                            <div class="accordion-content">
+                                <p>The Usage Guide is reviewed quarterly for minor updates and annually for major revisions. Updates are announced through the company newsletter and noted in the Version History section.</p>
+                                <p>If you encounter situations not addressed by the current guide or have suggestions for improvements, please share your feedback with the IQ Team.</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <p><em>Additional FAQs will be added based on common questions from users.</em></p>
+                </div>
+            </section>
+
+            <section id="contact" class="page-section">
+                <h2 class="section-title">Contact IQ Team</h2>
+                <div class="text-content">
+                    <p>The Intelliquinte IQ Team is available to provide guidance, review applications, and answer questions about implementing the brand system.</p>
+                    
+                    <div class="example-box">
+                        <h4>Contact Information</h4>
+                        <p><strong>Email:</strong> support@intelliquinte.com</p>
+                        <p><strong>Internal Slack:</strong> #brand-support</p>
+                        <p><strong>Response Time:</strong> Within 2 business days</p>
+                    </div>
+                    
+                    <h3 class="subsection-title">When to Contact the IQ Team</h3>
+                    <ul>
+                        <li>For guidance on complex brand applications not explicitly covered in this guide</li>
+                        <li>To request custom brand assets or templates</li>
+                        <li>For review of significant customer-facing materials before publication</li>
+                        <li>To report potential brand inconsistencies or issues</li>
+                        <li>To suggest improvements to the brand system or documentation</li>
+                    </ul>
+                    
+                    <p>The IQ Team is committed to supporting your success in implementing the Intelliquinte brand. We welcome your questions and feedback.</p>
+                </div>
+            </section>
+            
+            <div class="page-nav">
+                <a href="../brand-guidelines/index.html" class="prev-page">Brand Guidelines</a>
+                <a href="#key-principles" class="next-page">Key Principles</a>
+            </div>
+        </div>
+    </main>
+
+    <footer>
+        <div class="container">
+            <p class="copyright">&copy; 2025 Intelliquinte L.L.C. All rights reserved</p>
+        </div>
+    </footer>
+
+    <script src="script.js"></script>
+    
+    <!-- Additional initialization script to ensure tabs work -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Direct initialization of tabs for immediate functionality
+            const tabSystems = document.querySelectorAll('.tab-system');
+            
+            tabSystems.forEach(system => {
+                const tabNavItems = system.querySelectorAll('.tab-nav-item');
+                const tabContents = system.querySelectorAll('.tab-content');
+                
+                tabNavItems.forEach(navItem => {
+                    navItem.addEventListener('click', function() {
+                        const tabId = this.getAttribute('data-tab');
+                        
+                        // Deactivate all tabs
+                        tabNavItems.forEach(item => item.classList.remove('active'));
+                        tabContents.forEach(content => content.classList.remove('active'));
+                        
+                        // Activate the clicked tab
+                        this.classList.add('active');
+                        
+                        // Find and activate the corresponding content
+                        const targetContent = document.getElementById(tabId);
+                        if (targetContent) {
+                            targetContent.classList.add('active');
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+</body>
+</html> 
