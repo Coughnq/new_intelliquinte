@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatterSheet | Real-time Chat</title>
+    <meta name="description" content="A modern real-time chat application powered by Google Sheets">
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💬</text></svg>">
+    <!-- Inter font -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Socket.io Client -->
+    <script src="https://cdn.socket.io/4.6.0/socket.io.min.js"></script>
+    <!-- Stylesheet -->
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div id="app-container">
+            <div class="header">
+                <h2>ChatterSheet</h2>
+                <div class="user-info">
+                    <span>You are: </span>
+                    <span id="username-display"></span>
+                    <span id="connection-status" class="status-indicator offline" title="Connection status"></span>
+                </div>
+            </div>
+            <div class="chat-container">
+                <div id="chat-messages"></div>
+                <div class="typing-indicator" id="typing-indicator">
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-dot"></span>
+                    <span class="typing-text">Someone is typing...</span>
+                </div>
+                <div class="input-area">
+                    <input type="text" id="message-input" placeholder="Type your message..." autocomplete="off">
+                    <button id="send-btn">
+                        Send
+                        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="22" y1="2" x2="11" y2="13"></line>
+                            <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Socket.io connection with error handling
+        const socket = io('https://chattersheet-socketio.glitch.me/', {
+            reconnectionAttempts: 3,     // Reduced attempts to fail faster
+            reconnectionDelay: 2000,     // Shorter delay between attempts
+            timeout: 10000,              // Shorter timeout to detect problems quicker
+            autoConnect: true,
+            transports: ['polling', 'websocket'] // Try polling first, then websocket
+        });
+        
+        // App ID - Your deployment ID for Google Sheets backup
+        const SCRIPT_ID = 'AKfycbys-CEGiCVLk4E0jCWDZHn6lh8c42q8DB_fkTYqkXqfyMNlFxqRXuNOmu3E5DILKfWjWQ';
+        
+        // DOM Elements
+        const chatContainer = document.getElementById('app-container');
+        const messageInput = document.getElementById('message-input');
+        const sendBtn = document.getElementById('send-btn');
+        const chatMessages = document.getElementById('chat-messages');
+        const userNameDisplay = document.getElementById('username-display');
+        const connectionStatus = document.getElementById('connection-status');
+        const typingIndicator = document.getElementById('typing-indicator');
+        
+        // Typing indicator status
+        let typingTimeout;
+        let isTyping = false;
+
+        // Current user
+        let currentUser = {
+            id: localStorage.getItem('chatUserId') || generateUserId(),
+            username: localStorage.getItem('chatUsername') || generateUsername()
+        };
+        
+        // For Google Sheets backup only
+        let lastTimestamp = 0;
+        let messageCount = 0;
+
+        // Start in backup mode by default (assume Socket.io server might be down)
+        let usingBackupMode = true;
+
+        // Polling interval for backup mode (10 seconds)
+        const BACKUP_POLLING_INTERVAL = 10000;
+        let backupPollingTimer = null;
+
+        // Generate random user ID if not exists
+        function generateUserId() {
+            const userId = 'user_' + Math.random().toString(36).substring(2, 11);
+            localStorage.setItem('chatUserId', userId);
+            return userId;
+        }
+
+        // Generate random username if not exists
+        function generateUsername() {
+            const adjectives = ['Happy', 'Clever', 'Brave', 'Calm', 'Eager', 'Gentle', 'Jolly', 'Lively', 'Proud', 'Witty', 'Zesty', 'Cosmic', 'Electric', 'Majestic', 'Noble', 'Radiant'];
+            const nouns = ['Lion', 'Tiger', 'Eagle', 'Fox', 'Wolf', 'Bear', 'Hawk', 'Dolphin', 'Panda', 'Koala', 'Phoenix', 'Dragon', 'Falcon', 'Otter', 'Lynx', 'Panther'];
+            
+            const username = `${adjectives[Math.floor(Math.random() * adjectives.length)]}${nouns[Math.floor(Math.random() * nouns.length)]}`;
+            localStorage.setItem('chatUsername', username);
+            return username;
+        }
+
+        // Initialize the chat
+        function initializeChat() {
+            // Always show chat container
+            ensureChatVisible();
+            
+            // Display username
+            if (userNameDisplay) {
+                userNameDisplay.textContent = currentUser.username;
+            }
+            
+            // Initialize Socket.io
+            initializeSocket();
+            
+            // Always start with loading messages from Google Sheets 
+            // Don't wait for Socket.io to fail
+            loadMessages();
+            
+            // Start backup polling immediately
+            startBackupPolling();
+        }
+        
+        // Make sure chat is always visible
+        function ensureChatVisible() {
+            try {
+                if (chatContainer) {
+                    chatContainer.style.display = 'flex';
+                    chatContainer.style.visibility = 'visible';
+                }
+                
+                const container = document.querySelector('.container');
+                if (container) {
+                    container.style.display = 'block';
+                    container.style.visibility = 'visible';
+                }
+                
+                const chatContainerElement = document.querySelector('.chat-container');
+                if (chatContainerElement) {
+                    chatContainerElement.style.display = 'flex';
+                    chatContainerElement.style.visibility = 'visible';
+                }
+            } catch (e) {
+                console.error('Error in ensureChatVisible:', e);
+                // Even if this fails, the CSS !important rules should keep the chat visible
+            }
+        }
+
+        // Set up Socket.io connection and event handlers
+        function initializeSocket() {
+            // When connected to the server
+            socket.on('connect', () => {
+                connectionStatus.classList.remove('offline');
+                connectionStatus.classList.add('online');
+                connectionStatus.title = 'Connected';
+                
+                // Make sure chat is visible
+                ensureChatVisible();
+                
+                if (usingBackupMode) {
+                    usingBackupMode = false;
+                    showNotification("Real-time connection established!", "info");
+                    
+                    // Even with Socket.io connected, keep backup polling active 
+                    // but at a much longer interval
+                    if (backupPollingTimer) {
+                        stopBackupPolling();
+                        backupPollingTimer = setInterval(() => {
+                            pollForNewMessages();
+                        }, BACKUP_POLLING_INTERVAL * 3); // 30 seconds
+                    }
+                }
+                
+                // Register user
+                socket.emit('register', {
+                    userId: currentUser.id,
+                    username: currentUser.username
+                });
+                
+                // Request recent messages
+                socket.emit('getRecentMessages');
+            });
+            
+            // When disconnected
+            socket.on('disconnect', () => {
+                connectionStatus.classList.remove('online');
+                connectionStatus.classList.add('offline');
+                connectionStatus.title = 'Disconnected';
+                showNotification("Connection lost. Trying to reconnect...", "error");
+                
+                // Make sure chat is still visible
+                ensureChatVisible();
+                
+                // If disconnected, start backup polling
+                if (!usingBackupMode) {
+                    usingBackupMode = true;
+                    startBackupPolling();
+                }
+            });
+            
+            // Handle connection errors
+            socket.on('connect_error', (error) => {
+                console.error('Connection error:', error);
+                connectionStatus.classList.remove('online');
+                connectionStatus.classList.add('offline');
+                connectionStatus.title = 'Connection failed';
+                
+                // Make sure chat is visible even with connection errors
+                ensureChatVisible();
+                
+                // Only show notification once when entering backup mode
+                if (!usingBackupMode) {
+                    usingBackupMode = true;
+                    showNotification("Connection to chat server failed. Using Google Sheets backup mode.", "error");
+                    
+                    // Load messages from Google Sheets as backup
+                    loadMessages();
+                    
+                    // Start polling for new messages in backup mode
+                    startBackupPolling();
+                }
+            });
+            
+            // Receive messages
+            socket.on('message', (message) => {
+                appendMessage(message);
+                scrollToBottom();
+                
+                // Also back up to Google Sheets
+                backupMessageToGoogleSheets(message);
+            });
+            
+            // Receive recent message history
+            socket.on('recentMessages', (messages) => {
+                if (messages.length === 0) {
+                    showEmptyState();
+                } else {
+                    // Clear any existing messages first
+                    chatMessages.innerHTML = '';
+                    
+                    messages.forEach(message => {
+                        appendMessage(message);
+                    });
+                    scrollToBottom();
+                }
+            });
+            
+            // Typing indicators
+            socket.on('userTyping', (data) => {
+                if (data.userId !== currentUser.id) {
+                    typingIndicator.querySelector('.typing-text').textContent = `${data.username} is typing...`;
+                    typingIndicator.classList.add('visible');
+                    
+                    // Hide after 3 seconds if no more typing events
+                    clearTimeout(typingTimeout);
+                    typingTimeout = setTimeout(() => {
+                        typingIndicator.classList.remove('visible');
+                    }, 3000);
+                }
+            });
+            
+            socket.on('userStoppedTyping', (data) => {
+                if (data.userId !== currentUser.id) {
+                    typingIndicator.classList.remove('visible');
+                }
+            });
+        }
+
+        // Chat functionality - Send message
+        async function sendMessage() {
+            // Make sure chat is visible when sending a message
+            ensureChatVisible();
+            
+            if (!messageInput.value.trim()) return;
+            
+            const messageContent = messageInput.value.trim();
+            const messageData = {
+                id: generateMessageId(),
+                content: messageContent,
+                userId: currentUser.id,
+                username: currentUser.username,
+                timestamp: Date.now()
+            };
+            
+            // Disable send button while sending
+            sendBtn.disabled = true;
+            messageInput.disabled = true;
+            
+            try {
+                // Append message to UI immediately
+                appendMessage(messageData);
+                scrollToBottom();
+                
+                // Clear input and focus
+                messageInput.value = '';
+                
+                // Always backup to Google Sheets, regardless of Socket.io status
+                await backupMessageToGoogleSheets(messageData);
+                
+                // If Socket.io is connected, send message through Socket.io
+                if (socket.connected) {
+                    socket.emit('sendMessage', messageData);
+                } else {
+                    console.log('Socket disconnected, message backed up to Google Sheets only');
+                }
+                
+                // Reset typing indicator
+                if (isTyping) {
+                    isTyping = false;
+                    if (socket.connected) {
+                        socket.emit('stopTyping', {
+                            userId: currentUser.id,
+                            username: currentUser.username
+                        });
+                    }
+                }
+            } catch (error) {
+                console.error('Error sending message:', error);
+                showNotification("Message saved to backup but might not be delivered to others immediately.", "error");
+            } finally {
+                sendBtn.disabled = false;
+                messageInput.disabled = false;
+                messageInput.focus();
+            }
+        }
+        
+        // Generate unique message ID
+        function generateMessageId() {
+            return Date.now().toString(36) + Math.random().toString(36).substring(2);
+        }
+        
+        // Backup message to Google Sheets
+        async function backupMessageToGoogleSheets(message) {
+            try {
+                const url = `https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=addMessage&user_id=${encodeURIComponent(message.userId)}&username=${encodeURIComponent(message.username)}&content=${encodeURIComponent(message.content)}`;
+                fetch(url)
+                    .then(response => {
+                        if (!response.ok) {
+                            console.warn('Backup response not OK:', response.status);
+                        }
+                    })
+                    .catch(err => {
+                        console.error('Backup fetch error:', err);
+                    });
+            } catch (error) {
+                console.error('Error backing up message to Google Sheets:', error);
+            }
+        }
+
+        // Load messages from Google Sheets (backup)
+        async function loadMessages() {
+            ensureChatVisible();
+            try {
+                showNotification("Loading messages from backup...", "info");
+                
+                // Call the Google Script to get all messages
+                const response = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=getMessages`);
+                const data = await response.json();
+                
+                if (data.success) {
+                    // Only use these if Socket.io failed to deliver
+                    if (chatMessages.children.length === 0) {
+                        if (data.messages.length === 0) {
+                            showEmptyState();
+                        } else {
+                            messageCount = data.messages.length;
+                            data.messages.forEach(message => {
+                                const formattedMessage = {
+                                    id: message.id || generateMessageId(),
+                                    content: message.content,
+                                    userId: message.user_id,
+                                    username: message.username,
+                                    timestamp: message.timestamp
+                                };
+                                appendMessage(formattedMessage);
+                                if (message.timestamp > lastTimestamp) {
+                                    lastTimestamp = message.timestamp;
+                                }
+                            });
+                            scrollToBottom();
+                            showNotification("Messages loaded from backup successfully", "info");
+                        }
+                    }
+                }
+            } catch (error) {
+                console.error('Error loading backup messages:', error);
+                showNotification("Failed to load messages. Please refresh the page.", "error");
+                ensureChatVisible();
+            }
+        }
+
+        function appendMessage(message) {
+            // Check if message already exists
+            const existingMsg = document.getElementById(`msg-${message.id}`);
+            if (existingMsg) return;
+            
+            // Remove empty state if it exists
+            const emptyState = document.querySelector('.empty-state');
+            if (emptyState) {
+                emptyState.remove();
+            }
+            
+            const messageElement = document.createElement('div');
+            messageElement.className = `message ${message.userId === currentUser.id ? 'sent' : 'received'}`;
+            messageElement.id = `msg-${message.id}`;
+            
+            const infoElement = document.createElement('div');
+            infoElement.className = 'message-info';
+            infoElement.textContent = message.username;
+            
+            const contentElement = document.createElement('div');
+            contentElement.className = 'message-content';
+            contentElement.textContent = message.content;
+            
+            const timeElement = document.createElement('div');
+            timeElement.className = 'message-time';
+            timeElement.textContent = formatTime(message.timestamp);
+            
+            messageElement.appendChild(infoElement);
+            messageElement.appendChild(contentElement);
+            messageElement.appendChild(timeElement);
+            
+            chatMessages.appendChild(messageElement);
+        }
+        
+        // Format timestamp to readable time
+        function formatTime(timestamp) {
+            const date = new Date(timestamp);
+            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        }
+
+        function showEmptyState() {
+            const emptyState = document.createElement('div');
+            emptyState.className = 'empty-state';
+            emptyState.innerHTML = `
+                <div class="empty-icon">💬</div>
+                <h3>No messages yet</h3>
+                <p>Be the first to send a message!</p>
+            `;
+            chatMessages.appendChild(emptyState);
+        }
+
+        function scrollToBottom() {
+            chatMessages.scrollTop = chatMessages.scrollHeight;
+        }
+
+        // Show a temporary notification
+        function showNotification(message, type = 'info') {
+            // Remove existing notifications
+            document.querySelectorAll('.notification').forEach(note => note.remove());
+            
+            const notification = document.createElement('div');
+            notification.className = `notification ${type}`;
+            notification.textContent = message;
+            
+            document.body.appendChild(notification);
+            
+            // Remove after 3 seconds
+            setTimeout(() => {
+                notification.classList.add('fade-out');
+                setTimeout(() => {
+                    notification.remove();
+                }, 500);
+            }, 3000);
+        }
+
+        // Event Listeners
+        sendBtn.addEventListener('click', sendMessage);
+
+        messageInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                sendMessage();
+            }
+        });
+        
+        // Typing indicator
+        messageInput.addEventListener('input', () => {
+            if (!isTyping && messageInput.value.length > 0) {
+                isTyping = true;
+                socket.emit('typing', {
+                    userId: currentUser.id,
+                    username: currentUser.username
+                });
+            } else if (isTyping && messageInput.value.length === 0) {
+                isTyping = false;
+                socket.emit('stopTyping', {
+                    userId: currentUser.id,
+                    username: currentUser.username
+                });
+            }
+        });
+
+        // Initialize the chat when page loads and ensure chat is always visible
+        document.addEventListener('DOMContentLoaded', () => {
+            // Make sure the container is immediately visible
+            ensureChatVisible(); 
+            
+            // Then initialize the chat
+            initializeChat();
+        });
+
+        // Start polling for new messages in backup mode
+        function startBackupPolling() {
+            // Clear any existing polling
+            stopBackupPolling();
+            
+            // Start new polling interval
+            backupPollingTimer = setInterval(() => {
+                if (usingBackupMode) {
+                    pollForNewMessages();
+                }
+            }, BACKUP_POLLING_INTERVAL);
+            
+            console.log('Backup polling started');
+        }
+        
+        // Stop polling
+        function stopBackupPolling() {
+            if (backupPollingTimer) {
+                clearInterval(backupPollingTimer);
+                backupPollingTimer = null;
+                console.log('Backup polling stopped');
+            }
+        }
+        
+        // Poll for new messages when in backup mode
+        async function pollForNewMessages() {
+            ensureChatVisible(); // Make sure chat is visible every poll
+            
+            try {
+                const response = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=getMessagesAfter&timestamp=${lastTimestamp}`);
+                
+                if (!response.ok) {
+                    console.warn('Google Sheets API returned status:', response.status);
+                    return; // Exit early if we get an error response
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.messages && data.messages.length > 0) {
+                    console.log('Received', data.messages.length, 'new messages via polling');
+                    
+                    data.messages.forEach(message => {
+                        // Skip our own messages that we've already displayed
+                        const existingMsg = document.getElementById(`msg-${message.id}`);
+                        if (existingMsg) {
+                            return; // Skip if we already have this message
+                        }
+                        
+                        const formattedMessage = {
+                            id: message.id || generateMessageId(),
+                            content: message.content,
+                            userId: message.user_id,
+                            username: message.username,
+                            timestamp: message.timestamp
+                        };
+                        
+                        appendMessage(formattedMessage);
+                        
+                        if (message.timestamp > lastTimestamp) {
+                            lastTimestamp = message.timestamp;
+                        }
+                    });
+                    
+                    // Only scroll if new messages were added
+                    if (data.messages.length > 0) {
+                        scrollToBottom();
+                    }
+                }
+            } catch (error) {
+                console.error('Error polling for new messages:', error);
+                // Keep trying, don't show notifications for polling errors to avoid spamming
+            }
+        }
+    </script>
+</body>
+</html> 
