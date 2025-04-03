@@ -49,15 +49,51 @@
         </div>
     </div>
 
+    <!-- Emergency restore button -->
+    <div id="restore-button" class="restore-button">
+        <button onclick="forceRestoreChat()">Restore Chat</button>
+    </div>
+
     <script>
-        // Socket.io connection with error handling
-        const socket = io('https://chattersheet-socketio.glitch.me/', {
-            reconnectionAttempts: 3,     // Reduced attempts to fail faster
-            reconnectionDelay: 2000,     // Shorter delay between attempts
-            timeout: 10000,              // Shorter timeout to detect problems quicker
-            autoConnect: true,
-            transports: ['polling', 'websocket'] // Try polling first, then websocket
-        });
+        // Silence all socket.io errors
+        window.addEventListener('error', function(event) {
+            if (event.filename && event.filename.includes('socket.io')) {
+                event.preventDefault();
+                event.stopPropagation();
+                return false;
+            }
+        }, true);
+        
+        // Suppress Socket.io errors in console
+        const originalConsoleError = console.error;
+        console.error = function() {
+            // Check if this is a Socket.io error
+            if (arguments.length > 0 && 
+                (typeof arguments[0] === 'string' && 
+                (arguments[0].includes('socket.io') || 
+                 arguments[0].includes('Connection error') || 
+                 arguments[0].includes('WebSocket')))) {
+                // Suppress Socket.io errors
+                return;
+            }
+            // Pass through other errors
+            originalConsoleError.apply(console, arguments);
+        };
+        
+        // Suppress Socket.io warnings in console
+        const originalConsoleWarn = console.warn;
+        console.warn = function() {
+            // Check if this is a Socket.io warning
+            if (arguments.length > 0 && 
+                (typeof arguments[0] === 'string' && 
+                (arguments[0].includes('socket.io') || 
+                 arguments[0].includes('WebSocket')))) {
+                // Suppress Socket.io warnings
+                return;
+            }
+            // Pass through other warnings
+            originalConsoleWarn.apply(console, arguments);
+        };
         
         // App ID - Your deployment ID for Google Sheets backup
         const SCRIPT_ID = 'AKfycbys-CEGiCVLk4E0jCWDZHn6lh8c42q8DB_fkTYqkXqfyMNlFxqRXuNOmu3E5DILKfWjWQ';
@@ -85,12 +121,28 @@
         let lastTimestamp = 0;
         let messageCount = 0;
 
-        // Start in backup mode by default (assume Socket.io server might be down)
-        let usingBackupMode = true;
+        // Track connection attempt count
+        let socketConnectionAttempts = 0;
+        const MAX_CONNECTION_ATTEMPTS = 2;
 
-        // Polling interval for backup mode (10 seconds)
-        const BACKUP_POLLING_INTERVAL = 10000;
+        // Start in backup mode by default
+        let usingBackupMode = true;
+        
+        // Polling interval for backup mode (5 seconds)
+        const BACKUP_POLLING_INTERVAL = 5000;
         let backupPollingTimer = null;
+        
+        // Set of processed message IDs to prevent duplicates
+        const processedMessageIds = new Set();
+
+        // Socket.io connection settings - Minimal attempts to avoid unnecessary errors
+        const socket = io('https://chattersheet-socketio.glitch.me/', {
+            reconnectionAttempts: 2,      // Minimize attempts to reduce errors
+            reconnectionDelay: 1000,      // Short delay
+            timeout: 5000,                // Very short timeout
+            autoConnect: false,           // Don't auto-connect - we'll connect manually
+            transports: ['polling']       // Just use polling for simplicity
+        });
 
         // Generate random user ID if not exists
         function generateUserId() {
@@ -119,35 +171,68 @@
                 userNameDisplay.textContent = currentUser.username;
             }
             
-            // Initialize Socket.io
-            initializeSocket();
-            
-            // Always start with loading messages from Google Sheets 
-            // Don't wait for Socket.io to fail
+            // First try loading messages from Google Sheets (always works)
             loadMessages();
             
             // Start backup polling immediately
             startBackupPolling();
+            
+            // Maybe try Socket.io after a delay (if not disabled)
+            setTimeout(() => {
+                if (socketConnectionAttempts < MAX_CONNECTION_ATTEMPTS) {
+                    socketConnectionAttempts++;
+                    
+                    try {
+                        // Initialize Socket.io only if we haven't exceeded attempts
+                        initializeSocket();
+                        socket.connect();
+                    } catch (e) {
+                        // Silently fail if socket initialization throws
+                    }
+                }
+            }, 2000);
         }
         
         // Make sure chat is always visible
         function ensureChatVisible() {
             try {
+                // Make chat container visible
                 if (chatContainer) {
                     chatContainer.style.display = 'flex';
                     chatContainer.style.visibility = 'visible';
                 }
                 
+                // Make main container visible
                 const container = document.querySelector('.container');
                 if (container) {
                     container.style.display = 'block';
                     container.style.visibility = 'visible';
                 }
                 
+                // Make chat container element visible
                 const chatContainerElement = document.querySelector('.chat-container');
                 if (chatContainerElement) {
                     chatContainerElement.style.display = 'flex';
                     chatContainerElement.style.visibility = 'visible';
+                }
+                
+                // Ensure the input area is visible
+                const inputArea = document.querySelector('.input-area');
+                if (inputArea) {
+                    inputArea.style.display = 'flex';
+                    inputArea.style.visibility = 'visible';
+                }
+                
+                // Ensure the message input is visible
+                if (messageInput) {
+                    messageInput.style.display = 'block';
+                    messageInput.style.visibility = 'visible';
+                }
+                
+                // Ensure send button is visible
+                if (sendBtn) {
+                    sendBtn.style.display = 'flex';
+                    sendBtn.style.visibility = 'visible';
                 }
             } catch (e) {
                 console.error('Error in ensureChatVisible:', e);
@@ -155,39 +240,83 @@
             }
         }
 
-        // Set up Socket.io connection and event handlers
+        // Initialize Socket.io events
         function initializeSocket() {
-            // When connected to the server
-            socket.on('connect', () => {
-                connectionStatus.classList.remove('offline');
-                connectionStatus.classList.add('online');
-                connectionStatus.title = 'Connected';
-                
-                // Make sure chat is visible
-                ensureChatVisible();
-                
-                if (usingBackupMode) {
-                    usingBackupMode = false;
-                    showNotification("Real-time connection established!", "info");
-                    
-                    // Even with Socket.io connected, keep backup polling active 
-                    // but at a much longer interval
-                    if (backupPollingTimer) {
-                        stopBackupPolling();
-                        backupPollingTimer = setInterval(() => {
-                            pollForNewMessages();
-                        }, BACKUP_POLLING_INTERVAL * 3); // 30 seconds
-                    }
+            // All Socket.io event handlers will only do something if socket is actually connected
+            
+            // When messages are received
+            socket.on('receiveMessage', (message) => {
+                // Skip if we already have this message (from our own send or Google Sheets polling)
+                if (processedMessageIds.has(message.id)) {
+                    return;
                 }
                 
-                // Register user
-                socket.emit('register', {
-                    userId: currentUser.id,
-                    username: currentUser.username
-                });
+                // Add to processed IDs
+                processedMessageIds.add(message.id);
                 
-                // Request recent messages
-                socket.emit('getRecentMessages');
+                // Append to chat
+                appendMessage(message);
+                scrollToBottom();
+                
+                // Update last timestamp if newer
+                if (message.timestamp > lastTimestamp) {
+                    lastTimestamp = message.timestamp;
+                }
+            });
+            
+            // When a user starts typing
+            socket.on('userTyping', (user) => {
+                if (user.userId !== currentUser.id && typingIndicator) {
+                    try {
+                        const typingText = typingIndicator.querySelector('.typing-text');
+                        if (typingText) {
+                            typingText.textContent = `${user.username} is typing...`;
+                        }
+                        typingIndicator.classList.add('visible');
+                        
+                        // Remove the timeout completely so indicator stays visible
+                        clearTimeout(typingTimeout);
+                        // No more timeout - will stay visible until stopTyping event
+                    } catch (e) {
+                        // Silently ignore typing indicator errors
+                    }
+                }
+            });
+            
+            // When a user stops typing
+            socket.on('userStoppedTyping', (user) => {
+                if (user.userId !== currentUser.id && typingIndicator) {
+                    try {
+                        typingIndicator.classList.remove('visible');
+                    } catch (e) {
+                        // Silently ignore typing indicator errors
+                    }
+                }
+            });
+            
+            // When connected to the server
+            socket.on('connect', () => {
+                // Only attempt to use socket.io features if actually connected
+                if (socket.connected) {
+                    connectionStatus.classList.remove('offline');
+                    connectionStatus.classList.add('online');
+                    connectionStatus.title = 'Connected';
+                    
+                    // Make sure chat is visible
+                    ensureChatVisible();
+                    
+                    // Switch from backup mode when connected
+                    if (usingBackupMode) {
+                        usingBackupMode = false;
+                        showNotification("Real-time connection established!", "info");
+                    }
+                    
+                    // Register user
+                    socket.emit('register', {
+                        userId: currentUser.id,
+                        username: currentUser.username
+                    });
+                }
             });
             
             // When disconnected
@@ -195,87 +324,36 @@
                 connectionStatus.classList.remove('online');
                 connectionStatus.classList.add('offline');
                 connectionStatus.title = 'Disconnected';
-                showNotification("Connection lost. Trying to reconnect...", "error");
                 
                 // Make sure chat is still visible
                 ensureChatVisible();
                 
-                // If disconnected, start backup polling
+                // Switch to backup mode
                 if (!usingBackupMode) {
                     usingBackupMode = true;
-                    startBackupPolling();
                 }
             });
             
-            // Handle connection errors
-            socket.on('connect_error', (error) => {
-                console.error('Connection error:', error);
-                connectionStatus.classList.remove('online');
-                connectionStatus.classList.add('offline');
-                connectionStatus.title = 'Connection failed';
-                
-                // Make sure chat is visible even with connection errors
+            // Handle connection errors - silent and minimal
+            socket.on('connect_error', () => {
+                // Just ensure the chat is visible and we're in backup mode
                 ensureChatVisible();
+                usingBackupMode = true;
                 
-                // Only show notification once when entering backup mode
-                if (!usingBackupMode) {
-                    usingBackupMode = true;
-                    showNotification("Connection to chat server failed. Using Google Sheets backup mode.", "error");
-                    
-                    // Load messages from Google Sheets as backup
-                    loadMessages();
-                    
-                    // Start polling for new messages in backup mode
-                    startBackupPolling();
-                }
-            });
-            
-            // Receive messages
-            socket.on('message', (message) => {
-                appendMessage(message);
-                scrollToBottom();
-                
-                // Also back up to Google Sheets
-                backupMessageToGoogleSheets(message);
-            });
-            
-            // Receive recent message history
-            socket.on('recentMessages', (messages) => {
-                if (messages.length === 0) {
-                    showEmptyState();
-                } else {
-                    // Clear any existing messages first
-                    chatMessages.innerHTML = '';
-                    
-                    messages.forEach(message => {
-                        appendMessage(message);
-                    });
-                    scrollToBottom();
-                }
-            });
-            
-            // Typing indicators
-            socket.on('userTyping', (data) => {
-                if (data.userId !== currentUser.id) {
-                    typingIndicator.querySelector('.typing-text').textContent = `${data.username} is typing...`;
-                    typingIndicator.classList.add('visible');
-                    
-                    // Hide after 3 seconds if no more typing events
-                    clearTimeout(typingTimeout);
-                    typingTimeout = setTimeout(() => {
-                        typingIndicator.classList.remove('visible');
-                    }, 3000);
-                }
-            });
-            
-            socket.on('userStoppedTyping', (data) => {
-                if (data.userId !== currentUser.id) {
-                    typingIndicator.classList.remove('visible');
+                // After a few failed attempts, don't try anymore
+                socketConnectionAttempts++;
+                if (socketConnectionAttempts >= MAX_CONNECTION_ATTEMPTS) {
+                    try {
+                        socket.disconnect();
+                        socket.close();
+                    } catch (e) {
+                        // Ignore errors during disconnect
+                    }
                 }
             });
         }
 
-        // Chat functionality - Send message
+        // Send message (using backup by default)
         async function sendMessage() {
             // Make sure chat is visible when sending a message
             ensureChatVisible();
@@ -283,13 +361,18 @@
             if (!messageInput.value.trim()) return;
             
             const messageContent = messageInput.value.trim();
+            const messageId = generateMessageId();
+            
             const messageData = {
-                id: generateMessageId(),
+                id: messageId,
                 content: messageContent,
                 userId: currentUser.id,
                 username: currentUser.username,
                 timestamp: Date.now()
             };
+            
+            // Add to processed IDs to prevent duplicates
+            processedMessageIds.add(messageId);
             
             // Disable send button while sending
             sendBtn.disabled = true;
@@ -309,8 +392,6 @@
                 // If Socket.io is connected, send message through Socket.io
                 if (socket.connected) {
                     socket.emit('sendMessage', messageData);
-                } else {
-                    console.log('Socket disconnected, message backed up to Google Sheets only');
                 }
                 
                 // Reset typing indicator
@@ -324,8 +405,7 @@
                     }
                 }
             } catch (error) {
-                console.error('Error sending message:', error);
-                showNotification("Message saved to backup but might not be delivered to others immediately.", "error");
+                // Silent fail - already backed up to Google Sheets
             } finally {
                 sendBtn.disabled = false;
                 messageInput.disabled = false;
@@ -398,46 +478,48 @@
             }
         }
 
+        // Append message to the chat
         function appendMessage(message) {
-            // Check if message already exists
-            const existingMsg = document.getElementById(`msg-${message.id}`);
-            if (existingMsg) return;
+            // Check for duplicates first
+            const existingMessage = document.getElementById(`msg-${message.id}`);
+            if (existingMessage) {
+                return; // Skip if already exists
+            }
+            
+            const msgElement = document.createElement('div');
+            msgElement.classList.add('message');
+            msgElement.id = `msg-${message.id}`;
+            
+            // Determine if message is sent by current user
+            if (message.userId === currentUser.id) {
+                msgElement.classList.add('sent');
+            } else {
+                msgElement.classList.add('received');
+            }
+            
+            // Format timestamp
+            const date = new Date(message.timestamp);
+            const timeFormatted = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            const dateFormatted = date.toLocaleDateString();
+            
+            msgElement.innerHTML = `
+                <div class="message-info">${message.username}</div>
+                <div class="message-content">${message.content}</div>
+                <div class="message-time">${timeFormatted} - ${dateFormatted}</div>
+            `;
+            
+            chatMessages.appendChild(msgElement);
+            
+            // Update message count
+            messageCount++;
             
             // Remove empty state if it exists
             const emptyState = document.querySelector('.empty-state');
             if (emptyState) {
                 emptyState.remove();
             }
-            
-            const messageElement = document.createElement('div');
-            messageElement.className = `message ${message.userId === currentUser.id ? 'sent' : 'received'}`;
-            messageElement.id = `msg-${message.id}`;
-            
-            const infoElement = document.createElement('div');
-            infoElement.className = 'message-info';
-            infoElement.textContent = message.username;
-            
-            const contentElement = document.createElement('div');
-            contentElement.className = 'message-content';
-            contentElement.textContent = message.content;
-            
-            const timeElement = document.createElement('div');
-            timeElement.className = 'message-time';
-            timeElement.textContent = formatTime(message.timestamp);
-            
-            messageElement.appendChild(infoElement);
-            messageElement.appendChild(contentElement);
-            messageElement.appendChild(timeElement);
-            
-            chatMessages.appendChild(messageElement);
         }
         
-        // Format timestamp to readable time
-        function formatTime(timestamp) {
-            const date = new Date(timestamp);
-            return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-        }
-
         function showEmptyState() {
             const emptyState = document.createElement('div');
             emptyState.className = 'empty-state';
@@ -484,18 +566,44 @@
         
         // Typing indicator
         messageInput.addEventListener('input', () => {
-            if (!isTyping && messageInput.value.length > 0) {
+            if (messageInput.value.length > 0) {
+                // Always ensure typing is set to true when there's text
                 isTyping = true;
-                socket.emit('typing', {
-                    userId: currentUser.id,
-                    username: currentUser.username
-                });
-            } else if (isTyping && messageInput.value.length === 0) {
-                isTyping = false;
-                socket.emit('stopTyping', {
-                    userId: currentUser.id,
-                    username: currentUser.username
-                });
+                
+                // Always emit to Google Sheets backend so typing works even without Socket.io
+                try {
+                    fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=userTyping&user_id=${encodeURIComponent(currentUser.id)}&username=${encodeURIComponent(currentUser.username)}`);
+                } catch (e) {
+                    // Silent fail for typing indicator
+                }
+                
+                // Also emit through Socket.io if connected
+                if (socket.connected) {
+                    socket.emit('typing', {
+                        userId: currentUser.id,
+                        username: currentUser.username
+                    });
+                }
+            } else {
+                // Only emit stop typing if we were previously typing
+                if (isTyping) {
+                    isTyping = false;
+                    
+                    // Emit to Google Sheets backend
+                    try {
+                        fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=userStoppedTyping&user_id=${encodeURIComponent(currentUser.id)}&username=${encodeURIComponent(currentUser.username)}`);
+                    } catch (e) {
+                        // Silent fail for typing indicator
+                    }
+                    
+                    // Also emit through Socket.io if connected
+                    if (socket.connected) {
+                        socket.emit('stopTyping', {
+                            userId: currentUser.id,
+                            username: currentUser.username
+                        });
+                    }
+                }
             }
         });
 
@@ -506,7 +614,35 @@
             
             // Then initialize the chat
             initializeChat();
+            
+            // Set up a recurring check to make sure the input area is always visible
+            setInterval(() => {
+                ensureInputVisible();
+            }, 1000);
         });
+
+        // Special function just to keep the input area visible
+        function ensureInputVisible() {
+            try {
+                // Force the input area to be visible
+                const inputArea = document.querySelector('.input-area');
+                if (inputArea && (inputArea.style.display === 'none' || !inputArea.offsetParent)) {
+                    inputArea.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+                }
+                
+                // Force the message input to be visible
+                if (messageInput && (messageInput.style.display === 'none' || messageInput.offsetWidth === 0)) {
+                    messageInput.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important;';
+                }
+                
+                // Force the send button to be visible
+                if (sendBtn && sendBtn.style.display === 'none') {
+                    sendBtn.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+                }
+            } catch (e) {
+                // Silent fail - this is a safety check
+            }
+        }
 
         // Start polling for new messages in backup mode
         function startBackupPolling() {
@@ -517,6 +653,7 @@
             backupPollingTimer = setInterval(() => {
                 if (usingBackupMode) {
                     pollForNewMessages();
+                    pollForTypingUsers(); // Also check for typing users
                 }
             }, BACKUP_POLLING_INTERVAL);
             
@@ -540,21 +677,23 @@
                 const response = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=getMessagesAfter&timestamp=${lastTimestamp}`);
                 
                 if (!response.ok) {
-                    console.warn('Google Sheets API returned status:', response.status);
-                    return; // Exit early if we get an error response
+                    // Silently fail on API errors
+                    return;
                 }
                 
                 const data = await response.json();
                 
                 if (data.success && data.messages && data.messages.length > 0) {
-                    console.log('Received', data.messages.length, 'new messages via polling');
+                    let newMessagesAdded = 0;
                     
                     data.messages.forEach(message => {
-                        // Skip our own messages that we've already displayed
-                        const existingMsg = document.getElementById(`msg-${message.id}`);
-                        if (existingMsg) {
-                            return; // Skip if we already have this message
+                        // Skip messages we've already processed (using our Set)
+                        if (processedMessageIds.has(message.id)) {
+                            return;
                         }
+                        
+                        // Add to processed set
+                        processedMessageIds.add(message.id);
                         
                         const formattedMessage = {
                             id: message.id || generateMessageId(),
@@ -565,6 +704,7 @@
                         };
                         
                         appendMessage(formattedMessage);
+                        newMessagesAdded++;
                         
                         if (message.timestamp > lastTimestamp) {
                             lastTimestamp = message.timestamp;
@@ -572,14 +712,84 @@
                     });
                     
                     // Only scroll if new messages were added
-                    if (data.messages.length > 0) {
+                    if (newMessagesAdded > 0) {
                         scrollToBottom();
                     }
                 }
             } catch (error) {
-                console.error('Error polling for new messages:', error);
-                // Keep trying, don't show notifications for polling errors to avoid spamming
+                // Silent fail - don't log or show errors for polling
             }
+        }
+        
+        // Poll for users who are typing
+        async function pollForTypingUsers() {
+            try {
+                const response = await fetch(`https://script.google.com/macros/s/${SCRIPT_ID}/exec?action=getTypingUsers`);
+                
+                if (!response.ok) {
+                    return;
+                }
+                
+                const data = await response.json();
+                
+                if (data.success && data.users && data.users.length > 0) {
+                    // Look for typing users other than ourselves
+                    const otherTypingUsers = data.users.filter(user => user.user_id !== currentUser.id);
+                    
+                    if (otherTypingUsers.length > 0) {
+                        // Show typing indicator for the first typing user (could extend to show multiple)
+                        const typingUser = otherTypingUsers[0];
+                        
+                        if (typingIndicator) {
+                            try {
+                                const typingText = typingIndicator.querySelector('.typing-text');
+                                if (typingText) {
+                                    typingText.textContent = `${typingUser.username} is typing...`;
+                                }
+                                typingIndicator.classList.add('visible');
+                            } catch (e) {
+                                // Silently fail
+                            }
+                        }
+                    } else {
+                        // No users typing, hide indicator
+                        if (typingIndicator) {
+                            typingIndicator.classList.remove('visible');
+                        }
+                    }
+                } else {
+                    // No users typing at all
+                    if (typingIndicator) {
+                        typingIndicator.classList.remove('visible');
+                    }
+                }
+            } catch (error) {
+                // Silent fail
+            }
+        }
+
+        // Force restore the entire chat interface
+        function forceRestoreChat() {
+            // Reset the entire UI
+            document.querySelector('.container').style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important;';
+            
+            if (chatContainer) chatContainer.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+            
+            const chatContainerElement = document.querySelector('.chat-container');
+            if (chatContainerElement) chatContainerElement.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+            
+            const inputArea = document.querySelector('.input-area');
+            if (inputArea) inputArea.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+            
+            if (messageInput) messageInput.style.cssText = 'display: block !important; visibility: visible !important; opacity: 1 !important; width: 100% !important;';
+            
+            if (sendBtn) sendBtn.style.cssText = 'display: flex !important; visibility: visible !important; opacity: 1 !important;';
+            
+            // Show notification
+            showNotification("Chat interface restored!", "info");
+            
+            // Focus the input
+            if (messageInput) messageInput.focus();
         }
     </script>
 </body>
